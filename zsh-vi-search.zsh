@@ -4,6 +4,7 @@ export ZSH_VI_SEARCH_STRING
 export ZSH_VI_SEARCH_BUFFER
 export ZSH_VI_SEARCH_KEYMAP
 export ZSH_VI_SEARCH_MINIBUFFER
+autoload -U read-from-minibuffer
 
 # Decorate zle widgets preventing them from being overwritten
 zvs-visual-mode() { zsh-vi-search-previous-visual-mode; ZSH_VI_SEARCH_KEYMAP=visual }
@@ -22,9 +23,14 @@ for widget in visual-mode zle-keymap-select deactivate-region zle-line-pre-redra
   zle -N $widget zvs-$widget
 done
 
-# Highlight function
+# Highlight functions
 zsh-vi-search-highlight() {
+  [[ -v ZSH_VI_SEARCH_NOHL ]] && return
   region_highlight+=("$1 $2 standout, memo=zsh-vi-search-highlighting")
+}
+zsh-vi-search-highlight-clear() {
+  [[ -v ZSH_VI_SEARCH_NOHL ]] && return
+  region_highlight=()
 }
 
 # Search for matches
@@ -35,19 +41,24 @@ zsh-vi-search-indices() {
     [[ -z $line ]] && return
     local start="${line%%:*}" length="${#line#*:}"
     positions+="$start $(( start+length ))\n"
-  done <<< $(echo "$ZSH_VI_SEARCH_BUFFER" | grep -bo ${(@)grep_parameters} "$1" 2> /dev/null)
+  done <<< $(echo "$ZSH_VI_SEARCH_BUFFER" | grep -bo ${(@)grep_parameters} -- "$1" 2> /dev/null)
   echo $positions\n
 }
 
 # On minibuffer edited callback
 on-zsh-vi-search-minibuffer-edited() {
   (( ZSH_VI_SEARCH_MINIBUFFER != 1 )) && return
+  zsh-vi-search-highlight-clear
   local positions=("${(@f)$(zsh-vi-search-indices "$BUFFER")}")
   for position in $positions; do
     local p=(${=position}) start=${p[1]} end=${p[2]} to_remove=$(( ${#ZSH_VI_SEARCH_BUFFER}+2 ))
     zsh-vi-search-highlight $(( start-to_remove )) $(( end-to_remove ))
   done
 }
+
+# Close minibuffer
+close-minibuffer() { zle kill-whole-line && zle accept-line }
+zle -N close-minibuffer
 
 # Find the position of the word under the cursor
 zsh-vi-search-cursor-index() {
@@ -83,6 +94,7 @@ zsh-vi-search() {
     ;|
   esac
   [[ $keymap == visual ]] && zle set-mark-command
+  zsh-vi-search-highlight-clear
   local positions=("${(@f)$(zsh-vi-search-indices "$ZSH_VI_SEARCH_STRING")}")
   for position in $positions; do
     local p=(${=position}) start=${p[1]} end=${p[2]}
@@ -102,7 +114,7 @@ for w in zsh-vi-search-{forward,backward,{repeat,cursor}{,-rev}}; do
 done
 
 # Set the keybindings
-bindkey -M vicmd \/ zsh-vi-search-forward ? zsh-vi-search-backward
+bindkey -M vicmd \/ zsh-vi-search-forward \? zsh-vi-search-backward
 bindkey -M vicmd n zsh-vi-search-repeat N zsh-vi-search-repeat-rev
 bindkey -M vicmd \* zsh-vi-search-cursor \# zsh-vi-search-cursor-rev
 bindkey -M emacs '^[' close-minibuffer
