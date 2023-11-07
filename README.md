@@ -7,11 +7,11 @@ Adds support for vi search directly in the zsh buffer.
 ### Antigen
 With [antigen](https://github.com/zsh-users/antigen), add the following line to your `.zshrc`.
 ```
-  antigen bundle Whenti/zsh-vi-search
+  antigen bundle qleveque/zsh-vi-search
 ```
 
 ### Manually
-Download [zsh-vi-search.zsh](https://raw.githubusercontent.com/Whenti/zsh-vi-search/master/zsh-vi-search.zsh) and source it in your `.zshrc`.
+Download [zsh-vi-search.zsh](https://raw.githubusercontent.com/qleveque/zsh-vi-search/master/zsh-vi-search.zsh) and source it in your `.zshrc`.
 
 ## Usage
 
