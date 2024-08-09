@@ -6,20 +6,12 @@ export ZSH_VI_SEARCH_KEYMAP
 export ZSH_VI_SEARCH_MINIBUFFER
 autoload -U read-from-minibuffer
 
-# Decorate zle widgets preventing them from being overwritten
-zvs-visual-mode() { zsh-vi-search-previous-visual-mode; ZSH_VI_SEARCH_KEYMAP=visual }
-zvs-zle-keymap-select() { zsh-vi-search-previous-zle-keymap-select; ZSH_VI_SEARCH_KEYMAP=$KEYMAP }
-zvs-deactivate-region() { zsh-vi-search-previous-deactivate-region; ZSH_VI_SEARCH_KEYMAP=vicmd }
-zvs-zle-line-pre-redraw() { zsh-vi-search-previous-zle-line-pre-redraw; on-zsh-vi-search-minibuffer-edited }
-local current_zle_state=" ${$(zle -l)//$'\n'/ } "
+# Custom commands
+zvs-visual-mode() { ZSH_VI_SEARCH_KEYMAP=visual && zle .visual-mode}
+zvs-zle-keymap-select() { ZSH_VI_SEARCH_KEYMAP=$KEYMAP }
+zvs-deactivate-region() { ZSH_VI_SEARCH_KEYMAP=vicmd && zle .deactivate-region}
+zvs-zle-line-pre-redraw() { on-zsh-vi-search-minibuffer-edited }
 for widget in visual-mode zle-keymap-select deactivate-region zle-line-pre-redraw; do
-  if [[ $current_zle_state =~ ' '$widget' \((([^)]+))' ]]; then
-    eval "zsh-vi-search-previous-$widget() { ${match[1]} }"
-  elif [[ $current_zle_state =~ " $widget " ]]; then
-    eval "zsh-vi-search-previous-$widget() { zle $widget }"
-  else
-    eval "zsh-vi-search-previous-$widget() {}"
-  fi
   zle -N $widget zvs-$widget
 done
 
