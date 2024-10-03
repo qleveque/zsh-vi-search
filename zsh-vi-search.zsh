@@ -18,7 +18,7 @@ done
 # Highlight functions
 zsh-vi-search-highlight() {
   [[ -v ZSH_VI_SEARCH_NOHL ]] && return
-  region_highlight+=("$1 $2 standout, memo=zsh-vi-search-highlighting")
+  region_highlight+=("$1 $2 fg=8,standout, memo=zsh-vi-search-highlighting")
 }
 zsh-vi-search-highlight-clear() {
   [[ -v ZSH_VI_SEARCH_NOHL ]] && return
