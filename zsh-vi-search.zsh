@@ -82,10 +82,10 @@ zsh-vi-search() {
       read-from-minibuffer $char $ZSH_VI_SEARCH_PREFIX;
       bindkey -v
       ZSH_VI_SEARCH_MINIBUFFER=0 ZSH_VI_SEARCH_STRING=$REPLY
+      [[ $keymap == visual ]] && zle set-mark-command
       [[ -z $ZSH_VI_SEARCH_STRING ]] && return
     ;|
   esac
-  [[ $keymap == visual ]] && zle set-mark-command
   zsh-vi-search-highlight-clear
   local positions=("${(@f)$(zsh-vi-search-indices "$ZSH_VI_SEARCH_STRING")}")
   for position in $positions; do
